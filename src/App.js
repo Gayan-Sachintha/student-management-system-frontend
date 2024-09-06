@@ -1,30 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import UserForm from './components/UserForm';
-import UserList from './components/UserList';
-import { Container, Typography } from '@mui/material';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { AppBar, Toolbar, Button, Typography, Container } from '@mui/material';
+import StudentsPage from './pages/StudentsPage';
+import CoursesPage from './pages/CoursesPage';
+import EnrollmentsPage from './pages/EnrollmentsPage';
 
 function App() {
-  const [users, setUsers] = useState([]);
-  const [editUser, setEditUser] = useState(null);
-
-  const fetchUsers = async () => {
-    const res = await axios.get('http://localhost:5000/api/users');
-    setUsers(res.data);
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   return (
-    <Container>
-      <Typography variant="h3" align="center" gutterBottom>
-        Student Management System
-      </Typography>
-      <UserForm user={editUser} refreshUsers={fetchUsers} handleEditCancel={() => setEditUser(null)} />
-      <UserList users={users} refreshUsers={fetchUsers} setEditUser={setEditUser} />
-    </Container>
+    <Router>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            Student Management System
+          </Typography>
+          <Button color="inherit" component={Link} to="/students">
+            Students
+          </Button>
+          <Button color="inherit" component={Link} to="/courses">
+            Courses
+          </Button>
+          <Button color="inherit" component={Link} to="/enrollments">
+            Enrollments
+          </Button>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <Routes>
+          <Route path="/" element={<StudentsPage />} />
+          <Route path="/students" element={<StudentsPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/enrollments" element={<EnrollmentsPage />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 }
 
