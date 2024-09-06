@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Container, Box } from '@mui/material';
+import { TextField, Button, Container, Box, Snackbar, Alert } from '@mui/material';
 import { addStudent, updateStudent } from '../../services/api';
 
 const StudentForm = ({ student, refreshStudents, handleEditCancel }) => {
@@ -7,8 +7,11 @@ const StudentForm = ({ student, refreshStudents, handleEditCancel }) => {
     name: '',
     email: '',
     age: '',
-    grade: '',
+    grade: ''
   });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
     if (student) {
@@ -25,13 +28,26 @@ const StudentForm = ({ student, refreshStudents, handleEditCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (student) {
-      await updateStudent(student.id, formData);
-      handleEditCancel();
-    } else {
-      await addStudent(formData);
+    try {
+      if (student) {
+        await updateStudent(student.id, formData);
+        setSnackbarMessage('Student updated successfully!');
+      } else {
+        await addStudent(formData);
+        setSnackbarMessage('Student added successfully!');
+      }
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      refreshStudents();
+    } catch (error) {
+      setSnackbarMessage('Error: ' + (error.response?.data || 'Server error'));
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
-    refreshStudents();
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -83,6 +99,16 @@ const StudentForm = ({ student, refreshStudents, handleEditCancel }) => {
           )}
         </Box>
       </form>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

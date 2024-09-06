@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Snackbar, Alert } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -13,10 +16,19 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:5000/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
+      setSnackbarMessage('Login successful!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
       navigate('/students');
     } catch (error) {
-      console.error('Error logging in:', error.response.data);
+      setSnackbarMessage('Error logging in: ' + error.response.data);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -44,6 +56,16 @@ const Login = () => {
           <Button type="submit" variant="contained" color="primary" fullWidth>Login</Button>
         </Box>
       </form>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

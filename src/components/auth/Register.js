@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Snackbar, Alert } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,9 @@ const Register = () => {
     email: '',
     password: ''
   });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,10 +23,19 @@ const Register = () => {
     e.preventDefault();
     try {
       await axios.post('http://localhost:5000/auth/register', formData);
+      setSnackbarMessage('Registration successful!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
       navigate('/login');
     } catch (error) {
-      console.error('Error registering:', error.response.data);
+      setSnackbarMessage('Error registering: ' + error.response.data);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -62,6 +74,16 @@ const Register = () => {
           <Button type="submit" variant="contained" color="primary" fullWidth>Register</Button>
         </Box>
       </form>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
